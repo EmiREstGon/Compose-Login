@@ -1,5 +1,6 @@
 package com.example.composeapp
 
+import android.opengl.Visibility
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,8 +10,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,7 +27,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,8 +63,21 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     // val scrollState = rememberScrollState()
-    var value by remember { mutableStateOf(TextFieldValue("")) }
-    var isError by remember { mutableStateOf(false) }
+    var emailInput by remember { mutableStateOf(TextFieldValue("")) }
+    var isErrorEmail by remember { mutableStateOf(false) }
+    var passwordInput by remember { mutableStateOf(TextFieldValue("")) }
+    var isErrorPassword by remember { mutableStateOf(false) }
+    var passwordHidden by remember { mutableStateOf(true) }
+
+    val email_regex = "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
+            "\\@" +
+            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+            "(" +
+            "\\." +
+            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+            ")+"
+
+    val password_regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*?[#?!@\$%^&*-])[a-zA-Z\\d\\w\\W]{8,}\$"
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -74,16 +94,13 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.size(150.dp))
 
             TextField(
-                value = value,
+                value = emailInput,
                 onValueChange = {
-                    if (it.text.contains("h") || it.text.isNotEmpty()) {
-                        value = it
-                        isError = false
-                    } else {
-                        isError = true
-                    }
+                    emailInput = it
+
+                    isErrorEmail = !it.text.matches(email_regex.toRegex())
                 },
-                isError = isError,
+                isError = isErrorEmail,
                 label = {
                     Text("Email")
                 }
@@ -99,39 +116,56 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.size(30.dp))
 
             TextField(
-                value = value,
+                value = passwordInput,
                 onValueChange = {
-                    if (it.text.contains("h") || it.text.isNotEmpty()) {
-                        value = it
-                        isError = false
-                    } else {
-                        isError = true
-                    }
+                    passwordInput = it
+
+                    isErrorPassword = !it.text.matches(password_regex.toRegex())
                 },
-                isError = isError,
+                isError = isErrorPassword,
                 label = {
                     Text("Password")
-                }
+                },
+                /*visualTransformation =
+                    if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordHidden = !passwordHidden }) {
+                        val visibilityIcon =
+                            if (passwordHidden) Visibility else VisibilityOff
+                        // Please provide localized description for accessibility services
+                        val description = if (passwordHidden) "Show password" else "Hide password"
+                        Icon(imageVector = visibilityIcon, contentDescription = description)
+                    }
+                }*/
             )
 
             Spacer(modifier = Modifier.size(20.dp))
 
-            Button(onClick =  {
-                value = TextFieldValue(value.text + "1")
-            }) {
+            Button(
+                onClick =  {
+                    emailInput = TextFieldValue(emailInput.text + "1")
+                },
+                /*modifier = Modifier
+                    .background(color = Color.Transparent, shape = shape)
+                    .paint(
+                        painter = painterResource(id = R.drawable.button_background)
+                    )*/
+            ) {
                 Text(text = "LOGIN")
             }
 
             Spacer(modifier = Modifier.size(30.dp))
 
             Button(onClick =  {
-                value = TextFieldValue(value.text + "1")
+                passwordInput = TextFieldValue(passwordInput.text + "1")
             }) {
                 Text(text = "SINGIN")
             }
 
             Button(onClick =  {
-                value = TextFieldValue(value.text + "1")
+                emailInput = TextFieldValue("someone@gmail.com")
+                passwordInput = TextFieldValue("Passw0rd!")
             }) {
                 Text(text = "RECOVER PASSWORD")
             }
